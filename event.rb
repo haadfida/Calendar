@@ -1,22 +1,24 @@
-class Event
-  attr_accessor :id, :name, :venue, :date , :start_Time
+# frozen_string_literal: true
 
-  @@id_Increment = 0
-  def initialize(name, venue, date, start_Time)
-    @@id_Increment += 1
-    @id = @@id_Increment
+# Event Class
+class Event
+  attr_accessor :id, :name, :venue, :date, :start_time
+
+  @id_increment = 0
+  def initialize(name, venue, date, start_time)
+    @id_increment += 1
+    @id = @id_increment
     @name = name
     @venue = venue
     @date = date
-    @start_Time=start_Time
-    #time
-  end   
-  def print_Event()
-    p 'ID: ' +@id.to_s +
-    ' Event name: ' +@name.to_s +
-    ' Venue: ' +@venue.to_s +
-    ' start_Time: ' + @start_Time +
-    ' Date of event: ' +@date.to_s
+    @start_time = start_time
   end
 
+  def print_event
+    p "Event number: #{id}
+    + Event name: #{name}
+    + Venue: #{venue}
+    + start_time: #{start_time}
+    + initialize: #{date}"
+  end
 end
