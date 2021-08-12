@@ -4,10 +4,10 @@
 class Event
   attr_accessor :id, :name, :venue, :date, :start_time
 
-  @id_increment = 0
+  @@id_increment = 0
   def initialize(name, venue, date, start_time)
-    @id_increment += 1
-    @id = @id_increment
+    @@id_increment += 1
+    @id = @@id_increment
     @name = name
     @venue = venue
     @date = date
@@ -15,10 +15,6 @@ class Event
   end
 
   def print_event
-    p "Event number: #{id}
-    + Event name: #{name}
-    + Venue: #{venue}
-    + start_time: #{start_time}
-    + initialize: #{date}"
+    p "Event number: #{id} + Event name: #{name} + Venue: #{venue} + start_time: #{start_time} + date of event: #{date}"
   end
 end

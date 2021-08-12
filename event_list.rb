@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 require 'date'
-require_relative 'Event'
+require_relative 'event'
 # implements the class EventList
 class EventList
   attr_accessor :event_list, :days
 
   def initialize
-    @event_list = Hash.new { |hash, key| hash[key] = Hash.new { |h1, k1| h1[k1] = Hash.new { |h2, k2| h2[k2] = [] } } }
+    @event_list = Hash.new { |hash, key| hash[key] = Hash.new { |first_level_hash, first_level_hash_key| first_level_hash[first_level_hash_key] = Hash.new { |second_level_hash, second_level_hash_key| second_level_hash[second_level_hash_key] = [] } } }
     @days = {
       'Sunday' => 0,
       'Monday' => 1,
@@ -20,41 +20,46 @@ class EventList
   end
 
   def add_event(date, event)
-    d = Date._parse(date)
-    @event_list.dig(d[:year], d[:mon], d[:mday]) << event
+    date_parsed = Date._parse(date)
+    @event_list.dig(date_parsed[:year], date_parsed[:mon], date_parsed[:mday]) << event
   end
 
-  def fetch_info_to_update
-    print 'Enter the event number of the event you want to update '
+  def fetch_info_to_update(date_parsed)
+    print 'Enter the event number of the event you want to update: '
     id = gets.chomp
-    print 'Enter the new name of the event '
+    return false unless @event_list.dig(date_parsed[:year], date_parsed[:mon], date_parsed[:mday])&.find { |event| event.id == id.to_i }
+
+    print 'Enter the new name of the event: '
     updated_name = gets.chomp
-    print 'Enter the new venue of the event '
+    print 'Enter the new venue of the event: '
     updated_venue = gets.chomp
-    print 'Enter the new date of the event '
+    print 'Enter the new date of the event: '
     updated_date = gets.chomp
     [id, updated_name, updated_venue, updated_date]
   end
 
   def update_event(date, name)
-    d = Date._parse(date)
+    date_parsed = Date._parse(date)
     # wrapper method
-    @event_list.dig(d[:year], d[:mon], d[:mday]).select { |event| event.name = name }.map(&:print_event)
-    id, updated_name, updated_venue, updated_date = fetch_info_to_update
-    updated_event = @event_list[d[:year]][d[:mon]][d[:mday]].find { |event| event.id = id }
+    @event_list.dig(date_parsed[:year], date_parsed[:mon], date_parsed[:mday])&.select { |event| event.name = name }&.map(&:print_event)
+    id, updated_name, updated_venue, updated_date = fetch_info_to_update(date_parsed)
+    return false if updated_name.nil? || updated_venue.nil? || updated_date.nil?
+
+    updated_event = @event_list.dig(date_parsed[:year], date_parsed[:mon], date_parsed[:mday])&.find { |event| event.id == id.to_i }
     updated_event.name = updated_name
     updated_event.venue = updated_venue
-    updated_event.name = updated_name
     updated_event.date = updated_date
     updated_event.print_event
   end
 
   def delete_event(date, name)
     date_parsed = Date._parse(date)
-    @event_list.dig(date_parsed[:year], date_parsed[:mon], date_parsed[:mday]).select { |event| event.name = name }.map(&:print_event)
+    @event_list.dig(date_parsed[:year], date_parsed[:mon], date_parsed[:mday])&.select { |event| event.name = name }&.map(&:print_event)
     print 'Enter the event number of the event you want to delete '
     id = gets.chomp
-    @event_list.dig(date_parsed[:year], date_parsed[:mon], date_parsed[:mday]).reject! { |event| event.id == id.to_i }
+    return false unless @event_list[date_parsed[:year]][date_parsed[:mon]][date_parsed[:mday]].find { |event| event.id == id.to_i }
+
+    @event_list.dig(date_parsed[:year], date_parsed[:mon], date_parsed[:mday])&.reject! { |event| event.id == id.to_i }
   end
 
   def print_all_month_events(year, month)
