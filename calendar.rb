@@ -6,20 +6,30 @@ require_relative 'event_list'
 
 # class Calendar
 class Calendar
-  def time_val(time)
-    return false if date.match(/\s/) || date.match("\n")
-    return unless time =~ /\d{1,2}:\d{1,2}$/
-
-    hour, seconds = time.split(':')
-    return true if hour.to_i && seconds.to_i.positive? && hour.to_i && seconds.to_i < 61
+  def check_string(string)
+    string.scan(/\D/).empty?
   end
 
-  def date_val(date)
-    return false if date.match(/\s/) || date.match("\n")
-    return unless date =~ /\d{4}-\d{1,2}-\d{1,2}$/
+  def time_validate_checks(hour, seconds)
+    check_string(hour) && check_string(seconds) && hour.to_i.positive? && seconds.to_i.positive? && hour.to_i && seconds.to_i < 61
+  end
+
+  def time_validate(time)
+    return false if time == ''
+
+    hour, seconds = time.split(':')
+    return true if time_validate_checks(hour, seconds)
+  end
+
+  def date_validate_checks(year, month, day)
+    check_string(year) && check_string(month) && check_string(day) && year.to_i && month.to_i && day.to_i.positive? && month.to_i < 13 && day.to_i < 32
+  end
+
+  def date_validate(date)
+    return false if date == ''
 
     year, month, day = date.split('-')
-    return true if year.to_i && month.to_i && day.to_i.positive? && month.to_i < 13 && day.to_i < 32
+    return true if date_validate_checks(year, month, day)
   end
 
   def take_input(to_print)
@@ -27,11 +37,15 @@ class Calendar
     value = gets.chomp
   end
 
-  def date_search_eval(year, month, *day)
-    if day
-      return false if month.to_i < 1 || month.to_i > 12 || year.to_i < 1
+  def month_year_validate(month, year)
+    month.to_i.positive? && month.to_i < 13 && year.to_i.positive? && check_string(month) && check_string(year)
+  end
+
+  def date_search_eval(year, month, day = nil)
+    if day.nil?
+      return true if month_year_validate(month, year)
     else
-      return false if month.to_i < 1 || month.to_i > 12 || year.to_i < 1 || day.to_i < 1 || day.to_i > 31
+      return true if month_year_validate(month, year) && day.to_i.positive? && day.to_i < 32 && check_string(day)
     end
   end
 
@@ -51,10 +65,10 @@ class Calendar
         name = take_input('event name')
         venue = take_input('event venue')
         date = take_input('event date')
-        run_flag = date_val(date)
-        if run_flag
+        run_if_date_validated = date_validate(date)
+        if run_if_date_validated
           time = take_input('Enter time in format HH:MM')
-          if time_val(time)
+          if time_validate(time)
             event = Event.new(name, venue, date, time)
             event_list.add_event(date, event)
             puts('Event inserted successfully')
@@ -66,8 +80,8 @@ class Calendar
         end
       when 'B'
         date = take_input('event date')
-        run_flag = date_val(date)
-        if run_flag
+        run_if_date_validated = date_validate(date)
+        if run_if_date_validated
           name = take_input('event name')
           if event_list.update_event(date, name)
             puts('Successfully updated event')
@@ -79,10 +93,9 @@ class Calendar
         end
       when 'C'
         date = take_input('event date')
-        run_flag = date_val(date)
-        if run_flag
-          puts('Enter name: ')
-          name = gets.chomp
+        run_if_date_validated = date_validate(date)
+        if run_if_date_validated
+          name = take_input('event name')
           if event_list.delete_event(date, name)
             puts('Successfully deleted event')
           else
@@ -104,7 +117,7 @@ class Calendar
         month = take_input('month')
         day = take_input('day')
         if date_search_eval(year, month, day)
-          event_list.print_all_day_events(year, month, day)
+          event_list.print_all_day_events(year.to_i, month.to_i, day.to_i)
         else
           puts 'An error occured'
         end
