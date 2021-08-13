@@ -6,14 +6,16 @@ require_relative 'event_list'
 
 # class Calendar
 class Calendar
-  def time_eval(time)
+  def time_val(time)
+    return false if date.match(/\s/) || date.match("\n")
     return unless time =~ /\d{1,2}:\d{1,2}$/
 
     hour, seconds = time.split(':')
-    return true if hour.to_i && seconds.to_i.positive? && hour.to_i && seconds.to_i < 60
+    return true if hour.to_i && seconds.to_i.positive? && hour.to_i && seconds.to_i < 61
   end
 
-  def date_eval(date)
+  def date_val(date)
+    return false if date.match(/\s/) || date.match("\n")
     return unless date =~ /\d{4}-\d{1,2}-\d{1,2}$/
 
     year, month, day = date.split('-')
@@ -49,10 +51,10 @@ class Calendar
         name = take_input('event name')
         venue = take_input('event venue')
         date = take_input('event date')
-        run_flag = date_eval(date)
+        run_flag = date_val(date)
         if run_flag
           time = take_input('Enter time in format HH:MM')
-          if time_eval(time)
+          if time_val(time)
             event = Event.new(name, venue, date, time)
             event_list.add_event(date, event)
             puts('Event inserted successfully')
@@ -64,7 +66,7 @@ class Calendar
         end
       when 'B'
         date = take_input('event date')
-        run_flag = date_eval(date)
+        run_flag = date_val(date)
         if run_flag
           name = take_input('event name')
           if event_list.update_event(date, name)
@@ -77,7 +79,7 @@ class Calendar
         end
       when 'C'
         date = take_input('event date')
-        run_flag = date_eval(date)
+        run_flag = date_val(date)
         if run_flag
           puts('Enter name: ')
           name = gets.chomp
