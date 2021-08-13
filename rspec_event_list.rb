@@ -4,7 +4,7 @@ require 'rspec/autorun'
 require_relative 'event_list'
 
 describe EventList do
-  let(:event) {Event.new('Battle of the Bands', 'Downtown', '2021-09-02', '16:00')}
+  let(:event) { Event.new('Battle of the Bands', 'Downtown', '2021-09-02', '16:00') }
   let(:event_list) { EventList.new }
 
   it 'adds an event' do
